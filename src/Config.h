@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+namespace GMWhitelist {
 
 struct Config {
     int version = 1;
@@ -10,3 +11,5 @@ struct Config {
 
     bool ConsoleOutput = false;
 };
+
+} // namespace GMWhitelist

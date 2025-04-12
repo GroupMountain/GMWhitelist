@@ -18,11 +18,11 @@ void saveWhitelistFile() {
         info["name"] = name;
         data.push_back(info);
     }
-    GMLIB::Files::JsonFile::writeFile(path, data);
+    gmlib::utils::JsonUtils::writeFile(path, data);
 }
 
 void initDataFile() {
-    auto data = GMLIB::Files::JsonFile::initJson("./whitelist.json", nlohmann::json::array());
+    auto data = gmlib::utils::JsonUtils::initJson("./whitelist.json", nlohmann::json::array());
     for (auto& info : data) {
         if (info.contains("uuid")) {
             std::string uuid                           = info["uuid"];
@@ -54,7 +54,7 @@ bool isNameInWhitelist(std::string const& name) {
     if (mNameCache.contains(name)) {
         return true;
     }
-    if (auto uuid = GMLIB::UserCache::getUuidByName(name)) {
+    if (auto uuid = gmlib::tools::UserCache::getUuidByName(name)) {
         if (mWhiteListMap.contains(uuid.value())) {
             return true;
         }
@@ -66,7 +66,7 @@ bool addPlayer(std::string const& name) {
     if (isNameInWhitelist(name)) {
         return false;
     }
-    if (auto uuid = GMLIB::UserCache::getUuidByName(name)) {
+    if (auto uuid = gmlib::tools::UserCache::getUuidByName(name)) {
         mWhiteListMap[uuid.value()] = name;
     } else {
         mNameCache.insert(name);
@@ -78,7 +78,7 @@ bool addPlayer(std::string const& name) {
 bool removePlayer(std::string const& name) {
     auto pl = ll::service::getLevel()->getPlayer(name);
     if (pl) {
-        auto msg = tr("disconnect.notAllowed");
+        auto msg = "disconnect.notAllowed"_tr();
         pl->disconnect(msg);
     }
     for (auto& [uuid, playername] : mWhiteListMap) {
@@ -100,47 +100,44 @@ bool removePlayer(std::string const& name) {
 
 void showWhitelist(CommandOutput& output) {
     if (mWhiteListMap.empty()) {
-        return output.error(tr("command.whitelist.noInfo"));
+        return output.error("command.whitelist.noInfo"_tr());
     }
-    output.success(tr("command.whitelist.showInfo"));
+    output.success("command.whitelist.showInfo"_tr());
     for (auto& [uuid, name] : mWhiteListMap) {
-        output.success(tr("command.whitelist.whitelistInfo", {name, uuid.asString()}));
+        output.success("command.whitelist.whitelistInfo"_tr(name, uuid.asString()));
     }
     for (auto& name : mNameCache) {
-        output.success(tr("command.whitelist.whitelistInfo", {name, ""}));
+        output.success("command.whitelist.whitelistInfo"_tr(name, ""));
     }
 }
 
 void listenEvent() {
     auto& eventBus = ll::event::EventBus::getInstance();
-    eventBus.emplaceListener<GMLIB::Event::PacketEvent::ClientLoginAfterEvent>(
-        [](GMLIB::Event::PacketEvent::ClientLoginAfterEvent& event) {
-            if (event.getClientAuthXuid().empty()) {
-                return event.disConnectClient(tr("disconnect.clientNotAuth"));
+    eventBus.emplaceListener<ila::mc::ClientLoginAfterEvent>([](ila::mc::ClientLoginAfterEvent& event) {
+        if (event.clientAuthXuid().empty()) {
+            return event.disConnectClient("disconnect.clientNotAuth"_tr());
+        }
+        if (event.serverAuthXuid().empty() && ll::service::getPropertiesSettings()->mIsOnlineMode) {
+            return event.disConnectClient("disconnectionScreen.notAuthenticated"_tr());
+        }
+        auto uuid     = event.uuid();
+        auto realName = event.realName();
+        if (!isInWhitelist(uuid, realName)) {
+            auto msg = "disconnect.notAllowed"_tr(realName);
+            event.disConnectClient(msg);
+            if (GMWhitelist::Entry::getInstance().getConfig().ConsoleOutput) {
+                ll::io::LoggerRegistry::getInstance().getOrCreate(MOD_NAME)->info("logger.notAllowed"_tr(realName));
             }
-            if (event.getServerAuthXuid().empty() && ll::service::getPropertiesSettings()->useOnlineAuthentication()) {
-                return event.disConnectClient(tr("disconnectionScreen.notAuthenticated"));
-            }
-            auto uuid     = event.getUuid();
-            auto realName = event.getRealName();
-            if (!isInWhitelist(uuid, realName)) {
-                auto msg = tr("disconnect.notAllowed", {realName});
-                event.disConnectClient(msg);
-                if (GMWhitelist::Entry::getInstance()->getConfig().ConsoleOutput) {
-                    logger.info(tr("logger.notAllowed", {realName}));
-                }
-            }
-        },
-        ll::event::EventPriority::High
-    );
+        }
+    });
 }
 
 LL_AUTO_STATIC_HOOK(
-    FuckVanillaCmd,  // Vinalla Command Registry
-    ll::memory::HookPriority::Normal, 
-    "?setup@AllowListCommand@@SAXAEAVCommandRegistry@@AEAVAllowListFile@@@Z", 
-    void, 
-    class CommandRegistry& registry, 
+    FuckVanillaCmd, // Vinalla Command Registry
+    ll::memory::HookPriority::Normal,
+    &AllowListCommand::setup,
+    void,
+    class CommandRegistry& registry,
     class AllowListFile&
 ) {
     return;
@@ -150,8 +147,11 @@ LL_AUTO_TYPE_INSTANCE_HOOK(
     DisableVanillaAllowlist, // server.properties
     ll::memory::HookPriority::Normal,
     PropertiesSettings,
-    "?useAllowList@PropertiesSettings@@QEBA_NXZ",
-    bool
+    &PropertiesSettings::$ctor,
+    void*,
+    ::std::string const& filename
 ) {
-    return false;
+    auto res                                                  = origin(filename);
+    reinterpret_cast<PropertiesSettings*>(res)->mUseAllowList = false;
+    return res;
 }

@@ -5,33 +5,34 @@
 namespace GMWhitelist {
 
 
-using namespace GMLIB::Files::I18n;
 class Entry {
 
 public:
-    static std::unique_ptr<Entry>& getInstance();
+    static Entry& getInstance();
 
-    Entry(ll::plugin::NativePlugin& self) : mSelf(self) {}
+    Entry() : mSelf(*ll::mod::NativeMod::current()) {}
 
-    [[nodiscard]] ll::plugin::NativePlugin& getSelf() const { return mSelf; }
+    [[nodiscard]] ll::mod::NativeMod& getSelf() const { return mSelf; }
 
-    /// @return True if the plugin is loaded successfully.
+    /// @return True if the mod is loaded successfully.
     bool load();
 
-    /// @return True if the plugin is enabled successfully.
+    /// @return True if the mod is enabled successfully.
     bool enable();
 
-    /// @return True if the plugin is disabled successfully.
+    /// @return True if the mod is disabled successfully.
     bool disable();
 
     Config& getConfig();
 
-    LangI18n& getI18n();
+    gmlib::i18n::LangI18n& getI18n();
 
 private:
-    ll::plugin::NativePlugin& mSelf;
+    ll::mod::NativeMod& mSelf;
     std::optional<Config>     mConfig;
-    std::optional<LangI18n>   mI18n;
+    std::optional<gmlib::i18n::LangI18n>   mI18n;
 };
 
 } // namespace GMWhitelist
+
+LANGI18N_LITERALS(GMWhitelist::Entry::getInstance().getI18n())

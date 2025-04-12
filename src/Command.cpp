@@ -9,52 +9,52 @@ struct WhitelistParam {
 void RegWhitelistCmd() {
     auto& cmd = ll::command::CommandRegistrar::getInstance().getOrCreateCommand(
         "whitelist",
-        tr("command.whitelist.desc"),
-        (CommandPermissionLevel)GMWhitelist::Entry::getInstance()->getConfig().CommandPermissionLevel
+        "command.whitelist.desc"_tr(),
+        (CommandPermissionLevel)GMWhitelist::Entry::getInstance().getConfig().CommandPermissionLevel
     );
     ll::service::getCommandRegistry()->registerAlias("whitelist", "allowlist");
     cmd.overload<WhitelistParam>()
         .required("action")
         .required("name")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, WhitelistParam const& param) {
+        .execute([](CommandOrigin const& origin, CommandOutput& output, WhitelistParam const& param) {
             auto type = origin.getOriginType();
             if (type == CommandOriginType::DedicatedServer || type == CommandOriginType::Player) {
                 auto player = param.name;
                 if (magic_enum::enum_name(param.action) == "add") {
                     auto res = addPlayer(player);
                     if (res) {
-                        return output.success(tr("command.whitelist.addSuccess", {player}));
+                        return output.success("command.whitelist.addSuccess"_tr(player));
                     }
-                    return output.error(tr("command.whitelist.isInWhitelist", {player}));
+                    return output.error("command.whitelist.isInWhitelist"_tr(player));
                 } else {
                     auto res = removePlayer(player);
                     if (res) {
-                        return output.success(tr("command.whitelist.removeSuccess", {player}));
+                        return output.success("command.whitelist.removeSuccess"_tr(player));
                     }
-                    return output.error(tr("command.whitelist.notInWhitelist", {player}));
+                    return output.error("command.whitelist.notInWhitelist"_tr(player));
                 }
             }
-            return output.error(tr("command.error.invalidCommandOrigin"));
-        }>();
+            return output.error("command.error.invalidCommandOrigin"_tr());
+        });
     cmd.overload<WhitelistParam>()
         .text("reload")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, WhitelistParam const& param) {
+        .execute([](CommandOrigin const& origin, CommandOutput& output, WhitelistParam const& param) {
             auto type = origin.getOriginType();
             if (type == CommandOriginType::DedicatedServer || type == CommandOriginType::Player) {
                 initDataFile();
-                return output.success(tr("command.whitelist.reload"));
+                return output.success("command.whitelist.reload"_tr());
             }
-            return output.error(tr("command.error.invalidCommandOrigin"));
-        }>();
+            return output.error("command.error.invalidCommandOrigin"_tr());
+        });
     cmd.overload<WhitelistParam>()
         .text("list")
-        .execute<[](CommandOrigin const& origin, CommandOutput& output, WhitelistParam const& param) {
+        .execute([](CommandOrigin const& origin, CommandOutput& output, WhitelistParam const& param) {
             auto type = origin.getOriginType();
             if (type == CommandOriginType::DedicatedServer || type == CommandOriginType::Player) {
                 return showWhitelist(output);
             }
-            return output.error(tr("command.error.invalidCommandOrigin"));
-        }>();
+            return output.error("command.error.invalidCommandOrigin"_tr());
+        });
 }
 
 void RegisterCommands() { RegWhitelistCmd(); }

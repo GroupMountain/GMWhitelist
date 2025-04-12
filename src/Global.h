@@ -1,12 +1,9 @@
 #pragma once
-#include <include_all.h>
+#include <gmlib/include_all.h>
+#include <ila/include_all.h>
 #include <sstream>
 
-#define PLUGIN_NAME "GMWhitelist"
-
-extern ll::Logger logger;
-
-extern std::string tr(std::string const& key, std::vector<std::string> const& data = {});
+#define MOD_NAME "GMWhitelist"
 
 extern void initDataFile();
 extern void showWhitelist(CommandOutput& output);

@@ -1,13 +1,16 @@
 {
-    "name": "${pluginName}",
-    "entry": "${pluginFile}",
+    "name": "${modName}",
+    "entry": "${modFile}",
     "type": "native",
     "author": "GroupMountain",
     "description": "Whitelist Plugin for MCBE",
-    "version": "0.13.0",
+    "version": "0.13.1",
     "dependencies": [
         {
             "name": "GMLIB"
+        },
+        {
+            "name": "iListenAttentively"
         }
     ]
 }
