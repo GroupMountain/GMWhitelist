@@ -18,11 +18,11 @@ void saveWhitelistFile() {
         info["name"] = name;
         data.push_back(info);
     }
-    gmlib::utils::JsonUtils::writeFile(path, data);
+    gmlib::json_utils::writeFile(path, data);
 }
 
 void initDataFile() {
-    auto data = gmlib::utils::JsonUtils::initJson("./whitelist.json", nlohmann::json::array());
+    auto data = gmlib::json_utils::initJson("./whitelist.json", nlohmann::json::array());
     for (auto& info : data) {
         if (info.contains("uuid")) {
             std::string uuid                           = info["uuid"];
@@ -54,7 +54,7 @@ bool isNameInWhitelist(std::string const& name) {
     if (mNameCache.contains(name)) {
         return true;
     }
-    if (auto uuid = gmlib::tools::UserCache::getUuidByName(name)) {
+    if (auto uuid = gmlib::UserCache::getUuidByName(name)) {
         if (mWhiteListMap.contains(uuid.value())) {
             return true;
         }
@@ -66,7 +66,7 @@ bool addPlayer(std::string const& name) {
     if (isNameInWhitelist(name)) {
         return false;
     }
-    if (auto uuid = gmlib::tools::UserCache::getUuidByName(name)) {
+    if (auto uuid = gmlib::UserCache::getUuidByName(name)) {
         mWhiteListMap[uuid.value()] = name;
     } else {
         mNameCache.insert(name);

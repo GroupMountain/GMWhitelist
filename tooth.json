@@ -2,7 +2,7 @@
     "format_version": 3,
     "format_uuid": "329f57ab-4e28-47c9-acdc-dc149ad72edb",
     "tooth": "github.com/GroupMountain/GMWhitelist",
-    "version": "0.13.1",
+    "version": "0.13.2",
     "info": {
         "name": "GMWhitelist",
         "description": "Blacklist Mod on Bedrock Dedicated Server",
