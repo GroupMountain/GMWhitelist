@@ -54,8 +54,8 @@ bool isNameInWhitelist(std::string const& name) {
     if (mNameCache.contains(name)) {
         return true;
     }
-    if (auto uuid = gmlib::UserCache::getUuidByName(name)) {
-        if (mWhiteListMap.contains(uuid.value())) {
+    if (auto uuid = gmlib::UserCache::getInstance()->from(name)->mUuid) {
+        if (mWhiteListMap.contains(uuid)) {
             return true;
         }
     }
@@ -66,8 +66,8 @@ bool addPlayer(std::string const& name) {
     if (isNameInWhitelist(name)) {
         return false;
     }
-    if (auto uuid = gmlib::UserCache::getUuidByName(name)) {
-        mWhiteListMap[uuid.value()] = name;
+    if (auto uuid = gmlib::UserCache::getInstance()->from(name)->mUuid) {
+        mWhiteListMap[uuid] = name;
     } else {
         mNameCache.insert(name);
     }
