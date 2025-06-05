@@ -4,7 +4,7 @@
     "type": "native",
     "author": "GroupMountain",
     "description": "Whitelist Plugin for MCBE",
-    "version": "0.13.3",
+    "version": "0.13.4",
     "dependencies": [
         {
             "name": "GMLIB"
