@@ -35,4 +35,4 @@ private:
 
 } // namespace GMWhitelist
 
-LANGI18N_LITERALS(GMWhitelist::Entry::getInstance().getI18n())
+GMLIB_LANGI18N_LITERALS(GMWhitelist::Entry::getInstance().getI18n())

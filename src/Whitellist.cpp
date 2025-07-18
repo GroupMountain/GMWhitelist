@@ -1,5 +1,6 @@
 #include "Entry.h"
 #include "Global.h"
+#include "gmlib/gm/data/UserCache.h"
 
 std::unordered_map<mce::UUID, std::string> mWhiteListMap;
 std::unordered_set<std::string>            mNameCache;
@@ -54,7 +55,7 @@ bool isNameInWhitelist(std::string const& name) {
     if (mNameCache.contains(name)) {
         return true;
     }
-    if (auto uce = gmlib::UserCache::getInstance()->from(name)) {
+    if (auto uce = gmlib::UserCache::getInstance()->from(name,gmlib::UserCache::QueryType::Name)) {
         if (mWhiteListMap.contains(uce->mUuid)) {
             return true;
         }
@@ -66,7 +67,7 @@ bool addPlayer(std::string const& name) {
     if (isNameInWhitelist(name)) {
         return false;
     }
-    if (auto uce = gmlib::UserCache::getInstance()->from(name)) {
+    if (auto uce = gmlib::UserCache::getInstance()->from(name, gmlib::UserCache::QueryType::Name)) {
         mWhiteListMap[uce->mUuid] = name;
     } else {
         mNameCache.insert(name);
